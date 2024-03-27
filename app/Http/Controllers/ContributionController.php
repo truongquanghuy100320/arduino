@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ContributionModel;
+use App\Models\FacltiesModel;
 use ZipArchive;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -33,10 +34,12 @@ class ContributionController extends Controller
                 if (!file_exists($tempDirectory1)) {
                     mkdir($tempDirectory1, 0777, true);
                 }
+                $faculty = FacltiesModel::where('faculty_id', $contribution->faculty_id)->first();
+           $facultyName = $faculty ? $faculty->faculty_name : 'Unknown';
 
                 // Tạo tên file tạm thời dựa trên ID của bản ghi
-                $tempFileName = 'document_' . $contribution->contribution_id . '_' . $contribution->student_id . '_' . $contribution->faculty_id . '_' . $contribution->faculty_name . '.docx';
-                $tempFileName1 = 'contributions_' . $contribution->contribution_id . '_' . $contribution->student_id . '_' . $contribution->faculty_id . '_' . $contribution->faculty_name . '.zip';
+                $tempFileName = 'document_' . $contribution->contribution_id . '_' . $contribution->student_id . '_' . $contribution->faculty_id . '_' . $facultyName  . '.docx';
+                $tempFileName1 = 'contributions_' . $contribution->contribution_id . '_' . $contribution->student_id . '_' . $contribution->faculty_id . '_' . $facultyName  . '.zip';
 
                 // Tạo đường dẫn tệp tạm thời
                 $tempFilePath = $tempDirectory . '/' . $tempFileName;
@@ -127,8 +130,11 @@ class ContributionController extends Controller
     // Lấy thông tin của các bài tập dựa trên contribution_id đã hết hạn và lưu vào thư mục documentOut
     foreach ($expiredContributionIds as $contributionId) {
         $contribution = ContributionModel::where('contribution_id', $contributionId)->first();
+        $faculty = FacltiesModel::where('faculty_id', $contribution->faculty_id)->first();
+        $facultyName = $faculty ? $faculty->faculty_name : 'Unknown';
+
         if ($contribution) {
-            $docxFileName = 'documentOut_' . $contribution->contribution_id . '_' . $contribution->student_id . '_' . $contribution->faculty_id . '_' . $contribution->faculty_name . '_' . $contribution->faculty_id . '.docx';
+            $docxFileName = 'documentOut_' . $contribution->contribution_id . '_' . $contribution->student_id . '_' . $contribution->faculty_id . '_' . $facultyName .  '_' . $contribution->faculty_id . '.docx';
             $docxFilePath = $docxDirectory . DIRECTORY_SEPARATOR . $docxFileName;
 
             // Kiểm tra xem tệp docx đã tồn tại hay chưa trước khi lưu
@@ -143,7 +149,7 @@ class ContributionController extends Controller
     // Tạo tệp ZIP chứa các tệp docx đã hết hạn
     $zip = new ZipArchive;
     $zipFileName = 'all_expired_contributions_' . now()->format('YmdHis') . '.zip';
-    $zipFilePath = 'C:\xampp\htdocs\arduino\resources\temp\ZIP\\' . $zipFileName;
+    $zipFilePath = 'C:\xampp\htdocs\arduino\resources\temp\ZIPDOWNLOAD\\' . $zipFileName;
 
     if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
         return response()->json(['error' => 'Failed to create ZIP file'], 500);
@@ -162,9 +168,14 @@ class ContributionController extends Controller
     array_map('unlink', glob("$docxDirectory/*.*"));
     rmdir($docxDirectory);
 
+
     // Trả về tệp ZIP đã tạo
     return response()->download($zipFilePath, $zipFileName);
+
+
     }
+
+
 
 
 
