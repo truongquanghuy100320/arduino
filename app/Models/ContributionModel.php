@@ -24,7 +24,7 @@ class ContributionModel extends Model
         'academic_years_id',
         'downloaded',
         'expiration_date',
-        'download',
+        'download_date',
         'start_day',
     ];
 

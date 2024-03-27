@@ -6,9 +6,21 @@
         <div class="card-body">
             <h4 class="card-title">List Contribution</h4>
             <div class="template-demo">
-                <a type="button" href="" class="btn btn-info font-weight-bold"> Download All Contribution </a>
+                <a id="downloadLink" type="button" href="{{ route('contributions.download-All-Contributions') }}"
+                    class="btn btn-info font-weight-bold" download> Download All Contribution </a>
             </div>
+
             <div class="table-responsive">
+                @if(session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+                @endif
+                @if(session('sussec'))
+                <div class="alert alert-danger">
+                    {{ session('sussec') }}
+                </div>
+                @endif
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -19,17 +31,16 @@
                             <th>Image</th>
                             <th>Status</th>
                             <th>downloaded</th>
+                            <th>download_date</th>
                             <th>StaffID</th>
                             <th>StudentID</th>
                             <th>Faculty ID</th>
                             <th>Academic Years Id</th>
                             <th>Start day</th>
                             <th>Expiration Date</th>
-
                             <th>ZIP</th>
                             <th>Created</th>
                             <th>updated</th>
-                            <th>Download Status</th>
                             <th>Download</th>
 
                         </tr>
@@ -71,7 +82,16 @@
                                 @endif
                             </td>
 
-                            <td>{{$item -> downloaded}}</td>
+                            <td>
+                                @if($item -> downloaded == 1)
+                                <span style="color: green;">Downloaded successfully</span>
+                                @elseif($item -> downloaded == 2)
+                                <span style="color: green;">Download failed</span>
+                                @else
+                                <span style="color: blue;">not downloaded yet</span>
+                                @endif
+                            </td>
+                            <td>{{$item -> download_date}}</td>
                             <td>
                                 @if($item -> staff)
                                 ID: {{$item -> staff ->staff_id}} <br> Name: {{$item -> staff ->staffname}}
@@ -127,7 +147,6 @@
 
                             <td>{{$item -> created_at}}</td>
                             <td>{{$item -> updated_at}}</td>
-                            <td></td>
                             <td></td>
                         </tr>
                         @endforeach

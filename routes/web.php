@@ -48,6 +48,7 @@ Route::get('/list-staff',[StaffController::class,'list_staff'])->middleware('rol
 
 //contribution
 Route::get('/list-contribution',[ContributionController::class,'list_contribution'])->middleware('role.check')->name('contributions.list-contribution');
+Route::get('/download-All-Contributions', [ContributionController::class,'download_All_Contributions'])->middleware('role.check')->name('contributions.download-All-Contributions');
 
 //role
 Route::get('/list-role',[RoleController::class,'list_role'])->middleware('role.check')->name('roles.list-role');
