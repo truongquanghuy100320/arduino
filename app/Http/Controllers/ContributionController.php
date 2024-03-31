@@ -9,7 +9,10 @@ use ZipArchive;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
+use App\Models\StaffModel;
+use Illuminate\Support\Facades\Session;
 
 class ContributionController extends Controller
 {
@@ -168,18 +171,91 @@ class ContributionController extends Controller
     array_map('unlink', glob("$docxDirectory/*.*"));
     rmdir($docxDirectory);
 
+    ContributionModel::whereIn('contribution_id', $expiredContributionIds)->update([
+        'downloaded' => true,
+        'download_date' => now()
+    ]);
 
     // Trả về tệp ZIP đã tạo
     return response()->download($zipFilePath, $zipFileName);
 
 
+
+
     }
 
+public function download_contribution_by_id( int $contributionId){
+    $contribution = ContributionModel::find($contributionId);
+    if (!$contribution) {
+        return response()->json(['error' => 'Contribution not found'], 404);
+    }
+
+    // Tạo thư mục lưu trữ tệp docx đã hết hạn
+    $docxDirectory = 'C:\xampp\htdocs\arduino\resources\temp\documentOut';
+    if (!file_exists($docxDirectory)) {
+        mkdir($docxDirectory, 0777, true);
+    }
+
+    // Tạo tên tệp ZIP
+    $zipFileName = 'contribution_' . $contributionId . '_expired_' . now()->format('YmdHis') . '.zip';
+    $zipFilePath = 'C:\xampp\htdocs\arduino\resources\temp\ZIPDOWNLOAD\\' . $zipFileName;
+
+    // Tạo một tệp ZIP mới
+    $zip = new ZipArchive;
+    if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
+        return response()->json(['error' => 'Failed to create ZIP file'], 500);
+    }
+
+    // Thêm tệp docx của contribution vào tệp ZIP
+    $docxFileName = 'documentOut_' . $contribution->contribution_id . '_' . $contribution->student_id . '_' . $contribution->faculty_id . '.docx';
+    $docxFilePath = $docxDirectory . DIRECTORY_SEPARATOR . $docxFileName;
+
+    if (!file_exists($docxFilePath)) {
+        // Lưu tệp docx nếu chưa tồn tại
+        file_put_contents($docxFilePath, $contribution->word_document);
+    }
+
+    $zip->addFile($docxFilePath, $docxFileName);
+    $zip->close();
+
+    // Xóa tệp docx sau khi đã thêm vào tệp ZIP
+    unlink($docxFilePath);
+    ContributionModel::where('contribution_id', $contributionId)->update([
+        'downloaded' => true,
+        'download_date' => now()
+    ]);
+
+    // Trả về tệp ZIP đã tạo để tải xuống
+    return response()->download($zipFilePath, $zipFileName);
 
 
+}
 
+public function test_mail(Request $request){
+    // Lấy staff_id từ session
+    $staffId = Session::get('staff_id');
 
+    // Kiểm tra xem staff_id có tồn tại không
+    if (!$staffId) {
+        return response()->json(['error' => 'Staff ID not found in session'], 404);
+    }
 
+    // Lấy thông tin về nhân viên từ bảng tbl_staff
+    $staff = StaffModel::where('staff_id', $staffId)->first();
+
+    // Kiểm tra xem thông tin nhân viên có tồn tại không
+    if (!$staff) {
+        return response()->json(['error' => 'Staff not found'], 404);
+    }
+
+    // Gửi email
+    $name = 'test name';
+    Mail::send('contributions.test', compact('name'), function ($email) use ($staff) {
+        $email->to($staff->email, $staff->name);
+    });
+
+    return response()->json(['message' => 'Email sent successfully'], 200);
+}
 
 
 

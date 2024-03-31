@@ -49,7 +49,7 @@ Route::get('/list-staff',[StaffController::class,'list_staff'])->middleware('rol
 //contribution
 Route::get('/list-contribution',[ContributionController::class,'list_contribution'])->middleware('role.check')->name('contributions.list-contribution');
 Route::get('/download-All-Contributions', [ContributionController::class,'download_All_Contributions'])->middleware('role.check')->name('contributions.download-All-Contributions');
-
+Route::get('/download-contribution-by-id/{contribution_id}',[ContributionController::class,'download_contribution_by_id'])->middleware('role.check')->name('contributions.download-contribution-by-id');
 //role
 Route::get('/list-role',[RoleController::class,'list_role'])->middleware('role.check')->name('roles.list-role');
 
@@ -83,3 +83,8 @@ Route::get('/edit-staff/{staff_id}',[StaffController::class,'edit_staff'])->midd
 Route::post('/update-staff/{staff_id}',[StaffController::class,'update_staff'])->middleware('role.check')->name('staffs.update-staff');
 Route::get('/edit-status-show-staff/{staff_id}',[StaffController::class,'edit_status_show_staff'])->middleware('role.check')->name('staffs.edit-status-show-staff');
 Route::get('/edit-status-hide-staff/{staff_id}',[StaffController::class,'edit_status_hide_staff'])->middleware('role.check')->name('staffs.edit-status-hide-staff');
+
+
+// test mail
+
+Route::get('/test-mail',[ContributionController::class,'test_mail'])->middleware('role.check')->name('contributions.test-mail');

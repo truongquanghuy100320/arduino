@@ -24,7 +24,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Contribution ID</th>
+                            <th>ID</th>
                             <th>Content</th>
                             <th>File word</th>
                             <th>Title</th>
@@ -147,7 +147,14 @@
 
                             <td>{{$item -> created_at}}</td>
                             <td>{{$item -> updated_at}}</td>
-                            <td></td>
+                            <td>
+                                <a class="btn btn-dark btn-icon-text" id="downloadLink2"
+                                    href="{{ route('contributions.download-contribution-by-id',['contribution_id' =>$item->contribution_id ]) }}"
+                                    type="button" download>
+                                    Download
+                                    <i class="mdi mdi-file-check btn-icon-append" download></i>
+                                </a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

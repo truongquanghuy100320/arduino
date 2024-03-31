@@ -221,7 +221,20 @@
     });
     </script>
 
+    <script>
+    document.getElementById('downloadLink2').addEventListener('click', function(event) {
+        // Xác định thư mục mặc định để lưu file
+        var defaultSavePath = '/path/to/default/folder/';
 
+        // Xác định tên tệp
+        var fileName = 'contribution_' + new Date().toISOString().slice(0, 19).replace(/[-:]/g, '') +
+            '.zip';
+
+        // Thiết lập thư mục lưu file
+        this.setAttribute('download', fileName);
+        this.href = this.href + '?download=true&defaultSavePath=' + encodeURIComponent(defaultSavePath);
+    });
+    </script>
 
 
 
